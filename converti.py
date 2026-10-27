@@ -1,7 +1,7 @@
 import pandas as pd
 
 # change "virgola" (comma) with "punto" (point) in the file
-myfilename = "datiprova.txt"
+myfilename = "misuredatiprova.txt"
 myfilenamemod = myfilename.split(".")[0]+str("_mod.csv")
 #print (myfilenamemod)
 
