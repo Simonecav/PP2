@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from main import df
+from converti import df
 
 df.plot(x="Tempo(s)", y="Temperatura(C)", linestyle="None", marker=".")
 plt.show() 
