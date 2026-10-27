@@ -1,12 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from converti import df
+import pandas as pd
+from converti import converti
+
+file = "misure/Temperatura/1_1.txt"
+df = converti(file)
 
 df.plot(x="Tempo(s)", y="Temperatura(C)", linestyle="None", marker=".")
 plt.show() 
 
 # Ripulisco i dati 
-dfmod = df.drop( df[ (df["Tempo(s)"] <10) | (df["Temperatura(C)"] > 30) ].index )
+dfmod = df.drop(df[(df["Tempo(s)"] < 5)].index)
 dfmod.plot(x="Tempo(s)", y="Temperatura(C)", linestyle="None", marker=".")
 plt.show() 
 
@@ -18,9 +22,15 @@ print(T0)
 time = dfmod["Tempo(s)"].to_numpy()-t0
 temp = dfmod["Temperatura(C)"] .to_numpy()
 
-dtemp = np.repeat(0.2, len(temp)) #incertezze sulle temperature
+#incertezze sulle temperature
+fluttuazione = converti("misure/fluttuazione_temp.txt").std(ddof=1)['Temperatura(C)']
+print(fluttuazione)
 
-plt.errorbar(time, temp, yerr=dtemp, linestyle="None", marker=".", ecolor="r")
+dtemp = np.sqrt(0.05**2 + fluttuazione**2)
+t_error = np.repeat(dtemp, len(temp)) 
+print(dtemp)
+
+plt.errorbar(time, temp, yerr=t_error, linestyle="None", marker=".", ecolor="r")
 plt.xlabel("Time [s]")
 plt.ylabel("Temperature [C]")
 plt.show()
