@@ -16,7 +16,7 @@ T0 = dfmod["Temperatura(C)"] .to_numpy()[0]
 print(T0)
 
 time = dfmod["Tempo(s)"].to_numpy()-t0
-temp = dfmod["Temperatura(C)"] .to_numpy()
+temp = dfmod["Temperatura(C)"].to_numpy()
 
 #incertezze sulle temperature
 fluttuazione = converti("misure/fluttuazione_temp.txt").std(ddof=1)['Temperatura(C)']
@@ -26,22 +26,22 @@ dtemp = np.sqrt(0.05**2 + fluttuazione**2)
 temp_error = np.repeat(dtemp, len(temp)) 
 print(dtemp)
 
-T_bar = df.iloc[-1]["Temperatura(C)"] # Prendo l'ultimo elemento della temperatura come valore di asintoto
+T_bar = df[-30:]["Temperatura(C)"].mean() # Prendo la media degli ultimi 30 valori come valore asintotico
 print(T_bar)
 T_0 = 54.4
 
 # linearizzo dati e incertezze (err_ln(T) = (1/T)*err_T)
-df = pd.DataFrame({
+dati_fit = pd.DataFrame({
     "t": time,
     # "T - T_bar": temp - T_bar,
     # "dT": temp_error,
-    "ln(T - T_bar)": np.log(temp - T_bar - 0.10035342),
+    "ln(T - T_bar)": np.log(temp - T_bar), #- 0.10035342
     "dT": (1/(temp - T_bar))*temp_error,
 })
 
 # fit = ExpFit(df, "t", "T - T_bar", "dT")
 
-fit = LinearFit(df, "t", "ln(T - T_bar)", "dT")
+fit = LinearFit(dati_fit, "t", "ln(T - T_bar)", "dT")
 fig, ax = plt.subplots(1)
 fit.graph(ax, markersize=2, labels=("$t$ [s]", r"$T - \bar{T}$ [°C]"))
 ax.legend()
