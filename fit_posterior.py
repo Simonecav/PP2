@@ -4,20 +4,12 @@ from matplotlib import cm, pyplot as plt
 import my_lib_santanastasio as my
 from scipy import integrate
 
-from get_data import df, fluttuazione, T_bar, time, temp, dtemp
+plt.style.use("ggplot")
 
-# dfmod = df.drop(df[(df["Tempo(s)"] < 15) | (df["Tempo(s)"] > 25)].index)
+from get_data import T_bar, time_exp, temp_exp, dtemp
 
-# t0 = dfmod["Tempo(s)"].to_numpy()[0]
-# T0 = dfmod["Temperatura(C)"].to_numpy()[0]
-# print(T0)
-
-# time = dfmod["Tempo(s)"].to_numpy()-t0
-# temp = dfmod["Temperatura(C)"].to_numpy()
-# dtemp = np.sqrt(0.05**2 + fluttuazione**2)
-
-x = time
-y = temp - T_bar
+x = time_exp
+y = temp_exp - T_bar
 uy = dtemp
 
 def posterior(A,B,Y,X,SigmaY):    
@@ -25,17 +17,46 @@ def posterior(A,B,Y,X,SigmaY):
     #print (Yexp)
     return np.prod( stats.norm.pdf(Y, Yexp, SigmaY) )
 
-print (x)
-print (y.round(2))
-print (uy)
+#1
+# alim = (16.3, 16.6)
+# blim = (-0.2475, -0.2550)
 
-# m0, sm0, c0, sc0, cov0, rho0 = my.lin_fit(x, y, uy, "x [ux]", "y [uy]", 0, 3, 0, 15, plot=True, setrange=True)
+#2
+# alim = (15.7, 16)
+# blim = (-0.226, -0.22)
 
-# uy_new = np.sqrt(uy**2+(m0*ux)**2)
+#3
+# alim = (12.6, 12.9)
+# blim = (-0.212, -0.218)
 
-a_values = np.linspace(7.85, 8.05, 100)
-b_values = np.linspace(-0.21, -0.22, 100)
+#4
+alim = (13.5, 14)
+blim = (-0.226, -0.22)
+# alim = (11, 11.5)
+# blim = (-0.2, -0.22)
+
+N = 250
+a_values = np.linspace(alim[0], alim[1], N)
+b_values = np.linspace(blim[0], blim[1], N)
 a_mesh, b_mesh = np.meshgrid(a_values, b_values)
+
+# posterior_values = np.zeros(len(a_values)*len(b_values))
+# idx = 0
+# for aval, bval in np.nditer([a_mesh, b_mesh]):
+#     posterior_values[idx]=posterior(aval,bval,y,x,uy) 
+#     idx = idx + 1
+# posterior_mesh = posterior_values.reshape((len(a_values), len(b_values)))
+
+# # selezione del picco 
+# soglia = 1e-3 * posterior_mesh.max()
+# mask = posterior_mesh > soglia
+# a_sel = a_values[mask.any(axis=0)]
+# b_sel = b_values[mask.any(axis=1)]
+
+# # griglia stretta sul picco, poi rifai meshgrid, ciclo e reshape
+# a_values = np.linspace(a_sel.min(), a_sel.max(), 100)
+# b_values = np.linspace(b_sel.min(), b_sel.max(), 100)
+# a_mesh, b_mesh = np.meshgrid(a_values, b_values)
 
 posterior_values = np.zeros(len(a_values)*len(b_values))
 idx = 0
@@ -50,8 +71,8 @@ cbar = plt.colorbar(ax1)
 cbar.set_label('f(a,b)', rotation=270, labelpad=20)
 plt.xlabel("a")
 plt.ylabel("b")
-plt.grid()
 plt.title("Posterior probability density function")
+plt.savefig("immagini/temperatura/4/posterior2d.png")
 plt.show()
 
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -62,16 +83,12 @@ ax.set_xlabel('a')
 ax.set_ylabel('b')
 ax.set_zlabel('f(a,b)')
 plt.title("Posterior probability density function")
+plt.savefig("immagini/temperatura/4/posterior3d.png")
 plt.show()
 
 # Range delle variabili su cui fare inferenza
-
-#it works with uy=0.1, ux=0
-range_a = (7.85, 8.05)
-range_b = (-0.21, -0.22)
-
-#range_m = (0,10)
-#range_c = (0,10)
+range_a = alim
+range_b = blim
 
 # Integrale di normalizzazione della posterior
 normalization, integral_error_norm = integrate.nquad(posterior, 
@@ -80,7 +97,7 @@ normalization, integral_error_norm = integrate.nquad(posterior,
                                                     ],
                                                     args=(y,x,uy)
                                                     )
-print (normalization, integral_error_norm)
+#print (normalization, integral_error_norm)
 
 # Posterior normalizzata (PDF)
 def posterior_norm(A,B,Y,X,SigmaY):    
@@ -139,8 +156,8 @@ Rho_ab = Cov_ab / (Sigma_a*Sigma_b)
 
 my.PrintResult("a_fit",E_a,Sigma_a,20,"[y/x]")
 my.PrintResult("b_fit",E_b,Sigma_b,20,"[y]")
-print("Cov[a,b] fit", Cov_ab)
-print("Rho[a,b] fit", Rho_ab)
+print("Cov[a,b] fit: ", Cov_ab)
+print("Rho[a,b] fit: ", Rho_ab)
 
 
 posterior_norm_b = lambda B: np.fabs(integrate.nquad(posterior_norm, [range_a], args=(B,y,x,uy))[0]) # Marginale
@@ -156,7 +173,7 @@ plt.axvline(x = E_b+Sigma_b, color = 'orange', linestyle='--', label=r'$E[b] \pm
 plt.axvline(x = E_b-Sigma_b, color = 'orange', linestyle='--')
 plt.plot(b_values, stats.norm.pdf(b_values,E_b,Sigma_b), linewidth=1, color='black',linestyle='--',label='Gaussian')
 plt.legend()
-plt.grid()
+plt.savefig("immagini/temperatura/4/dist_b.png")
 plt.show()
 
 
@@ -180,5 +197,5 @@ plt.axvline(x = E_a+Sigma_a, color = 'orange', linestyle='--', label=r'$E[a] \pm
 plt.axvline(x = E_a-Sigma_a, color = 'orange', linestyle='--')
 plt.plot(a_values, stats.norm.pdf(a_values,E_a,Sigma_a), linewidth=1, color='black',linestyle='--',label='Gaussian')
 plt.legend()
-plt.grid()
+plt.savefig("immagini/temperatura/4/dist_a.png")
 plt.show()
