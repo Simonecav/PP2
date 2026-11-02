@@ -1,10 +1,7 @@
 import numpy as np
-from matplotlib.pyplot import show
 from converti import converti
 
 df = converti("misure/Temperatura/4_3.txt")
-df.plot(x="Tempo(s)", y="Temperatura(C)")
-show()
 
 # inf_lim = 12.5
 # inf_lim = 5.5

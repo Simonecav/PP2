@@ -4,8 +4,14 @@ import pandas as pd
 from mylib import LinearFit
 plt.style.use("ggplot")
 
-from get_data import time_linear, temp_linear, temp_error_linear, time_exp, temp_exp, temp_error_exp, T_bar 
-from fit_posterior import E_a, E_b
+from get_data import df, time_linear, temp_linear, temp_error_linear, time_exp, temp_exp, temp_error_exp, T_bar 
+
+# grafico esempio dell'andamento della temperatura
+# plt.plot(df['Tempo(s)'], df['Temperatura(C)'])
+# plt.xlabel("$t$ [s]")
+# plt.ylabel("$T$ [°C]")
+# plt.savefig("./immagini/temperatura/temperatura_esempio.png")
+# plt.show()
 
 # FIT LINEARE
 # linearizzo dati e incertezze (err_ln(T) = (1/T)*err_T)
@@ -25,7 +31,10 @@ plt.show()
 print(f"chi quadro e chi2 ridotto per il fit lineare: {fit.get_chi2().chi2}, {fit.get_chi2().rid}")
 print(f"P value per il fit lineare: {fit.get_chi2().pvalue}")
 
-# Sovrappongo ai dati l'esponenziale restituito dal fit per integrazione della posterior
+from fit_posterior import E_a, E_b
+
+# Sovrappongo ai dati l'esponenziale 
+# restituito dal fit per integrazione della posterior
 def f(x, a, b):   
     return [a*np.exp(b*xi) for xi in x]
 

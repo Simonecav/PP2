@@ -12,8 +12,11 @@ x = time_exp
 y = temp_exp - T_bar
 uy = dtemp
 
+def f(A,B,X):
+    return A*np.exp(B*X)
+
 def posterior(A,B,Y,X,SigmaY):    
-    Yexp = A*np.exp(B*X) # modello di fit
+    Yexp = f(A,B,X) # modello di fit
     #print (Yexp)
     return np.prod( stats.norm.pdf(Y, Yexp, SigmaY) )
 
@@ -178,7 +181,7 @@ plt.show()
 
 
 def posterior_a(B,A,Y,X,SigmaY):    
-    Yexp = A*np.exp(B*X) # modello di fit
+    Yexp = f(A,B,X) # modello di fit
     return np.prod( stats.norm.pdf(Y, Yexp, SigmaY) )
 
 def posterior_a_norm(B,A,Y,X,SigmaY):    
@@ -199,3 +202,9 @@ plt.plot(a_values, stats.norm.pdf(a_values,E_a,Sigma_a), linewidth=1, color='bla
 plt.legend()
 plt.savefig("immagini/temperatura/4/dist_a.png")
 plt.show()
+
+residui = y - f(x, E_a, E_b)
+chi2 = np.sum((residui / uy)**2)
+glib = len(x) - 2
+
+print(chi2, glib)
