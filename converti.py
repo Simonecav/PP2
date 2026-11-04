@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-myfilename = "./misure/siringone/pressi.s.txt"
+myfilename = "./misure/siringone/pressione0.txt"
 myfilenamemod = os.path.splitext(myfilename)[0] + ".csv"    
 new_file_content = ""
 with open(myfilename, "r", encoding="utf8", errors="ignore") as reading_file:
