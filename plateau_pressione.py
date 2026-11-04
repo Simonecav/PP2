@@ -48,14 +48,14 @@ while i < len(maschera): #finché è vero che vale sono nella tollerenza
 
 # Risultati per ogni plateau
 #print(f"{'#':>2} {'t_ini [s]':>10} {'t_fin [s]':>10} {'N':>5} {'media [kPa]':>12} {'std [kPa]':>10} {'sem [kPa]':>10}")
-print(f" {'media [kPa]':>12} {'std [kPa]':>10} ")
+print(f" {'media [kPa]':>12} {'sem [kPa]':>10}")
 
 for k, (i, j) in enumerate(tratti, 1):
     seg = p[i:j + 1]
     N = len(seg)
     std = seg.std(ddof=1)
     #print(f"{k:>2} {t[i]:>10.2f} {t[j]:>10.2f} {N:>5} {seg.mean():>12.6f} {std:>10.6f} {std/np.sqrt(N):>10.6f}")
-    print(f"{seg.mean():>12.6f} {std:>10.6f} {std/np.sqrt(N):>10.6f}")
+    print(f"{seg.mean():>12.6f} {std/np.sqrt(N):>10.6f}")
    
     # Grafico dei dati grezzi, così come sono
 plt.figure(figsize=(10, 4))
