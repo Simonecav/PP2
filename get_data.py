@@ -19,7 +19,9 @@ dfmod_exp = dfmod.drop(dfmod[(dfmod["Tempo(s)"] > inf_lim+40)].index) # 40 secon
 time_exp = dfmod_exp["Tempo(s)"].to_numpy()-t0
 temp_exp = dfmod_exp["Temperatura(C)"].to_numpy()
 
-fluttuazione = converti("misure/fluttuazione_temp.txt").std(ddof=1)['Temperatura(C)']
+df_fluttuazione = converti("misure/fluttuazione_temp.txt")
+N = df_fluttuazione.__len__()
+fluttuazione = df_fluttuazione.std(ddof=1)['Temperatura(C)']
 dtemp = np.sqrt(0.05**2 + fluttuazione**2)
 
 #incertezze sulle temperature per il fit esponenziale
