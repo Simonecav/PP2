@@ -19,7 +19,8 @@ DP = []
 beta = []
 
 for i in range(1, 6):
-    data_vol = converti(f"./misure/Tenuta_cilindro/posizione_senza_termometro/{i}.txt")*1.e2 # cm
+    data_vol = converti(f"./misure/Tenuta_cilindro/posizione_senza_termometro/{i}.txt")
+    data_vol["Posizione(m)"] = data_vol["Posizione(m)"]*1.e2
     # if (i == 5):
     #     data_vol = data_vol.drop(data_vol[(data_vol['Tempo(s)'] > 80)].index)
     dh = 0.0022 # cm
@@ -60,6 +61,7 @@ fig.set_size_inches(8, 5)
 ax.plot(DP, beta, "o")
 ax.set_xlabel("$\\Delta P$ [kPa]", fontsize=15)
 ax.set_ylabel("$\\beta$ [cm$^3$/min]", fontsize=15)
+plt.savefig("./immagini/tenuta_cilindro/senza_termometro/beta.png")
 plt.show()
 
 
