@@ -11,18 +11,21 @@ G = 9.81
 
 M = [0, 31.5, 63.0, 101.3, 139.9] # g
 P = [] # kPa
-#S = [] # mm^2
-
 P_0 = 101.11 # kPa
 
-DP = []
-beta = []
+dm = 0.1*1.e-2 # g
 
-for i in range(1, 6):
-    data_vol = converti(f"./misure/Tenuta_cilindro/posizione_senza_termometro/{i}.txt")
-    data_vol["Posizione(m)"] = data_vol["Posizione(m)"]*1.e2
-    # if (i == 5):
-    #     data_vol = data_vol.drop(data_vol[(data_vol['Tempo(s)'] > 80)].index)
+df_beta = pd.DataFrame({
+    "P": [],
+    "beta": [],
+    "d_beta": [],
+})
+
+for i in range(1, 5):
+    data_vol = converti(f"./misure/Tenuta_cilindro/posizione/{i+1}.txt")
+    data_vol["Posizione(m)"] = -data_vol["Posizione(m)"]*1.e2 # converto in cm ed inverto
+    if (i == 4):
+        data_vol = data_vol.drop(data_vol[(data_vol['Tempo(s)'] > 80)].index)
     dh = 0.0022 # cm
 
     df = pd.DataFrame({
@@ -31,7 +34,7 @@ for i in range(1, 6):
         "dh": np.repeat(dh, data_vol.__len__())
     })
 
-    fit = LinearFit(df, "t", "h", "dh")
+    fit = LinearFit(df, "t", "h", "dh", True)
 
     alpha = fit.get_fit_params()[0][0] # cm/s
 
@@ -41,27 +44,35 @@ for i in range(1, 6):
     fig, ax = plt.subplots()
     fig.set_size_inches(8, 5)
     fit.graph(ax, ("$t$ [s]", "$h(t)$ [m]"), 2, 15)
-    ax.set_title(f"$m$ = {M[i-1]} g", fontsize=18)
-    plt.savefig(f"./immagini/tenuta_cilindro/senza_termometro/posizione_{i}.png")
+    ax.set_title(f"$m$ = {M[i]} g", fontsize=18)
+    plt.savefig(f"./immagini/tenuta_cilindro/con_termometro/posizione_{i+1}.png")
     plt.show()
 
     # Ricava la superficie
-    data_p = converti(f"./misure/Tenuta_cilindro/pressione_senza_termometro/{i}.txt")
-    p_mean = data_p["Pressione(kPa)"].mean()
+    data_p = converti(f"./misure/Tenuta_cilindro/pressione/{i+1}.txt")
+    P = data_p["Pressione(kPa)"].mean() # media
+    dP = np.sqrt(0.005**2 + (data_p["Pressione(kPa)"].std(ddof=1)**2)/data_p.__len__()) #kPa
 
-    S = ((M[i-1]*G)/p_mean)*1.e-2 # mm^2 -> cm^2
+    S = ((M[i]*G)/P)*1.e-2 # mm^2 -> cm^2
 
-    alpha = alpha*60 # cm/min
+    alpha = alpha*60 # cm/s -> cm/min
+    d_alpha = np.sqrt(fit.get_fit_params()[1][0][0]) * 60
+    beta = alpha * S # cm^3/min
+    # if i==0:
+    #     d_beta = beta * np.sqrt((dP/P)**2 + (d_alpha/alpha)**2) 
+    # else:
+    d_beta = beta * np.sqrt((dm/M[i])**2 + (dP/P)**2 + (d_alpha/alpha)**2)
 
-    beta.append(alpha * S) # cm^3/min
-    DP.append(p_mean)
+    df_beta.loc[i] = [P, beta, d_beta]
+
+print(df_beta)
+
+fit_beta = LinearFit(df_beta, "P", "beta", "d_beta")
 
 fig, ax = plt.subplots()
-fig.set_size_inches(8, 5)
-ax.plot(DP, beta, "o")
-ax.set_xlabel("$\\Delta P$ [kPa]", fontsize=15)
-ax.set_ylabel("$\\beta$ [cm$^3$/min]", fontsize=15)
-plt.savefig("./immagini/tenuta_cilindro/senza_termometro/beta.png")
+fit_beta.graph(ax, ("$\\Delta P$ [kPa]", "$\\beta$ [cm$^3$/min]"), 5, 15)
+plt.savefig("./immagini/tenuta_cilindro/con_termometro/beta.png")
 plt.show()
 
+print(fit_beta.get_chi2().chi2)
 
