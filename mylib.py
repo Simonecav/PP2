@@ -50,7 +50,7 @@ class LinearFit:
             return Chi2(chi2, deg_f)
         else:
             chi2_0 = np.sum((residui**2))
-            sigma_res = np.sqrt(chi2_0) / deg_f
+            sigma_res = np.sqrt(chi2_0 / deg_f)
             return Chi2(chi2_0, deg_f), sigma_res
 
     
