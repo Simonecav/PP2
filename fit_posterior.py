@@ -3,40 +3,52 @@ from scipy import stats
 from matplotlib import cm, pyplot as plt
 import my_lib_santanastasio as my
 from scipy import integrate
+from scipy.optimize import curve_fit
 
 plt.style.use("ggplot")
 
-from get_data import T_bar, time_exp, temp_exp, dtemp
+from get_data_temp import T_bar, time_exp, temp_exp, dtemp
 
 x = time_exp
 y = temp_exp - T_bar
 uy = dtemp
 
+
 def f(A,B,X):
     return A*np.exp(B*X)
 
-def posterior(A,B,Y,X,SigmaY):    
-    Yexp = f(A,B,X) # modello di fit
-    #print (Yexp)
-    return np.prod( stats.norm.pdf(Y, Yexp, SigmaY) )
+p0, cov = curve_fit(lambda X, A, B: f(A, B, X), x, y,
+                    p0=[23, -0.0126], sigma=uy, absolute_sigma=True)
+s0 = np.sqrt(np.diag(cov))
+chi2_min = np.sum(((y - f(p0[0], p0[1], x)) / uy)**2)
 
+alim = (p0[0] - 4*s0[0], p0[0] + 4*s0[0])
+blim = (p0[1] - 4*s0[1], p0[1] + 4*s0[1])
+
+def posterior(A,B,Y,X,SigmaY):    
+    chi2 = np.sum(((Y - f(A, B, X)) / SigmaY)**2)
+    return np.exp(-0.5 * (chi2 - chi2_min))
 #1
 # alim = (16.3, 16.6)
 # blim = (-0.2475, -0.2550)
 
 #2
-# alim = (15.7, 16)
-# blim = (-0.226, -0.22)
+#alim = (15.7, 16)
+#blim = (-0.226, -0.22)
 
 #3
-# alim = (12.6, 12.9)
-# blim = (-0.212, -0.218)
+#alim = (12.6, 12.9)
+#blim = (-0.212, -0.218)
 
 #4
-alim = (13.5, 14)
-blim = (-0.226, -0.22)
-# alim = (11, 11.5)
-# blim = (-0.2, -0.22)
+# alim = (13.5, 14)
+# blim = (-0.226, -0.22)
+#alim = (11, 11.5)
+#blim = (-0.2, -0.22)
+
+#aria 1
+# alim = (22, 25)
+# blim = (-0.015, -0.01)
 
 N = 250
 a_values = np.linspace(alim[0], alim[1], N)
@@ -75,7 +87,7 @@ cbar.set_label('f(a,b)', rotation=270, labelpad=20)
 plt.xlabel("a")
 plt.ylabel("b")
 plt.title("Posterior probability density function")
-plt.savefig("immagini/temperatura/4/posterior2d.png")
+plt.savefig("immagini/temperatura/aria2/posterior2d.png")
 plt.show()
 
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -86,7 +98,7 @@ ax.set_xlabel('a')
 ax.set_ylabel('b')
 ax.set_zlabel('f(a,b)')
 plt.title("Posterior probability density function")
-plt.savefig("immagini/temperatura/4/posterior3d.png")
+plt.savefig("immagini/temperatura/aria2/posterior3d.png")
 plt.show()
 
 # Range delle variabili su cui fare inferenza
@@ -176,13 +188,13 @@ plt.axvline(x = E_b+Sigma_b, color = 'orange', linestyle='--', label=r'$E[b] \pm
 plt.axvline(x = E_b-Sigma_b, color = 'orange', linestyle='--')
 plt.plot(b_values, stats.norm.pdf(b_values,E_b,Sigma_b), linewidth=1, color='black',linestyle='--',label='Gaussian')
 plt.legend()
-plt.savefig("immagini/temperatura/4/dist_b.png")
+plt.savefig("immagini/temperatura/aria2/dist_b.png")
 plt.show()
 
 
 def posterior_a(B,A,Y,X,SigmaY):    
-    Yexp = f(A,B,X) # modello di fit
-    return np.prod( stats.norm.pdf(Y, Yexp, SigmaY) )
+    chi2 = np.sum(((Y - f(A, B, X)) / SigmaY)**2)
+    return np.exp(-0.5 * (chi2 - chi2_min))
 
 def posterior_a_norm(B,A,Y,X,SigmaY):    
     return posterior_a(B,A,Y,X,SigmaY) / normalization
@@ -200,7 +212,7 @@ plt.axvline(x = E_a+Sigma_a, color = 'orange', linestyle='--', label=r'$E[a] \pm
 plt.axvline(x = E_a-Sigma_a, color = 'orange', linestyle='--')
 plt.plot(a_values, stats.norm.pdf(a_values,E_a,Sigma_a), linewidth=1, color='black',linestyle='--',label='Gaussian')
 plt.legend()
-plt.savefig("immagini/temperatura/4/dist_a.png")
+plt.savefig("immagini/temperatura/aria2/dist_a.png")
 plt.show()
 
 residui = y - f(x, E_a, E_b)

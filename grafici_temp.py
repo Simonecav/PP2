@@ -4,7 +4,7 @@ import pandas as pd
 from mylib import LinearFit
 plt.style.use("ggplot")
 
-from get_data import df, time_linear, temp_linear, temp_error_linear, time_exp, temp_exp, temp_error_exp, T_bar 
+from get_data_temp import df, time_linear, temp_linear, temp_error_linear, time_exp, temp_exp, temp_error_exp, T_bar 
 
 # grafico esempio dell'andamento della temperatura
 # plt.plot(df['Tempo(s)'], df['Temperatura(C)'])
@@ -25,7 +25,7 @@ fit = LinearFit(dati_fit, "t", "ln(T - T_bar)", "dT")
 fig, ax = plt.subplots(1)
 fit.graph(ax, markersize=2, labels=("$t$ [s]", r"$T - \bar{T}$ [°C]"))
 ax.legend()
-plt.savefig("./immagini/temperatura/4/lineare.png")
+plt.savefig("./immagini/temperatura/aria2/lineare.png")
 plt.show()
 
 print(f"chi quadro e chi2 ridotto per il fit lineare: {fit.get_chi2().chi2}, {fit.get_chi2().rid}")
@@ -44,5 +44,5 @@ plt.errorbar(time_exp, temp_exp - T_bar, temp_error_exp, ecolor='r', elinewidth=
 plt.xlabel("$t$ [s]")
 plt.ylabel("$T - \\bar{T}$ [°C]")
 plt.legend()
-plt.savefig("./immagini/temperatura/4/esponenziale.png")
+plt.savefig("./immagini/temperatura/aria2/esponenziale.png")
 plt.show()
