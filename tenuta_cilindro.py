@@ -26,8 +26,8 @@ df_beta = pd.DataFrame({
     "d_beta": [],
 })
 
-for i in range(1, 5):
-    data_vol = converti(f"./misure/Tenuta_cilindro/posizione_senza_termometro/{i+1}.txt")
+for i in range(0, 5):
+    data_vol = converti(f"./misure/Tenuta_cilindro/posizione/{i+1}.txt")
     data_vol["Posizione(m)"] = -data_vol["Posizione(m)"]*1.e2 # converto in cm ed inverto
     if (i == 4):
         data_vol = data_vol.drop(data_vol[(data_vol['Tempo(s)'] > 80)].index)
@@ -54,7 +54,7 @@ for i in range(1, 5):
     # plt.show()
 
     # Ricava la superficie
-    data_p = converti(f"./misure/Tenuta_cilindro/pressione_senza_termometro/{i+1}.txt")
+    data_p = converti(f"./misure/Tenuta_cilindro/pressione/{i+1}.txt")
     P = data_p["Pressione(kPa)"].mean() # media
     dP = np.sqrt(0.005**2 + (data_p["Pressione(kPa)"].std(ddof=1)**2)/data_p.__len__()) #kPa
 
@@ -78,7 +78,7 @@ fit_beta_ws = LinearFit(df_beta, "P", "beta")
 
 fig, ax = plt.subplots()
 fit_beta_ws.graph(ax, ("$\\Delta P$ [kPa]", "$\\beta$ [cm$^3$/min]"), 5, 15)
-plt.savefig("./immagini/tenuta_cilindro/senza_termometro/beta.png")
+plt.savefig("./immagini/tenuta_cilindro/con_termometro/beta.png")
 plt.show()
 
 # Aggiorno le sigma con il metodo dei residui
@@ -90,6 +90,7 @@ print(df_beta)
 fig, ax = plt.subplots()
 fit_beta = LinearFit(df_beta, "P", "beta", "d_beta")
 fit_beta.graph(ax, ("$\\Delta P$ [kPa]", "$\\beta$ [cm$^3$/min]"), 5, 15)
+plt.savefig("./immagini/tenuta_cilindro/con_termometro/beta_con_sigma.png")
 plt.show()
 
 print("chi2 = ", fit_beta.get_chi2().chi2)
