@@ -17,8 +17,8 @@ dm = 0.1 # g
 
 piston_diameter = 3.25 # cm
 error_piston_diameter = 0.01 # cm
-S = (np.pi/4)*(piston_diameter)**2
-print(S)
+S = (np.pi/4)*(piston_diameter)**2 # cm^2
+dS = (np.pi/2)*piston_diameter*error_piston_diameter # cm^2
 
 df_beta = pd.DataFrame({
     "P": [],
@@ -27,7 +27,7 @@ df_beta = pd.DataFrame({
 })
 
 for i in range(1, 5):
-    data_vol = converti(f"./misure/Tenuta_cilindro/posizione/{i+1}.txt")
+    data_vol = converti(f"./misure/Tenuta_cilindro/posizione_senza_termometro/{i+1}.txt")
     data_vol["Posizione(m)"] = -data_vol["Posizione(m)"]*1.e2 # converto in cm ed inverto
     if (i == 4):
         data_vol = data_vol.drop(data_vol[(data_vol['Tempo(s)'] > 80)].index)
@@ -54,14 +54,13 @@ for i in range(1, 5):
     # plt.show()
 
     # Ricava la superficie
-    data_p = converti(f"./misure/Tenuta_cilindro/pressione/{i+1}.txt")
+    data_p = converti(f"./misure/Tenuta_cilindro/pressione_senza_termometro/{i+1}.txt")
     P = data_p["Pressione(kPa)"].mean() # media
     dP = np.sqrt(0.005**2 + (data_p["Pressione(kPa)"].std(ddof=1)**2)/data_p.__len__()) #kPa
 
     #S = ((M[i]*G)/P)*1.e-2 # mm^2 -> cm^2
 
     #dS = G * (M[i]/P)*np.sqrt((dm/M[i])**2 + (dP/P)**2) * 1.e-2
-    dS = (np.pi/2)*piston_diameter*error_piston_diameter # cm^2
 
     alpha = alpha*60 # cm/s -> cm/min
     d_alpha = np.sqrt(fit.get_fit_params()[1][0][0]) * 60
@@ -79,7 +78,7 @@ fit_beta_ws = LinearFit(df_beta, "P", "beta")
 
 fig, ax = plt.subplots()
 fit_beta_ws.graph(ax, ("$\\Delta P$ [kPa]", "$\\beta$ [cm$^3$/min]"), 5, 15)
-plt.savefig("./immagini/tenuta_cilindro/con_termometro/beta.png")
+plt.savefig("./immagini/tenuta_cilindro/senza_termometro/beta.png")
 plt.show()
 
 # Aggiorno le sigma con il metodo dei residui
@@ -95,3 +94,8 @@ plt.show()
 
 print("chi2 = ", fit_beta.get_chi2().chi2)
 print("p-value = ", fit_beta.get_chi2().pvalue)
+
+omega = fit_beta.get_fit_params()[0][0]
+omega_err = np.sqrt(fit_beta.get_fit_params()[1][0][0])
+
+print(f"omega = {omega} +- {omega_err}")
